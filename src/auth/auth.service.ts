@@ -10,16 +10,30 @@ export class AuthService {
   userSelect: Prisma.UserSelect = {
     id: true,
     email: true,
-    passwordHash: true,
   };
   constructor(private db: DbService) {}
+
+  async getUserByEmail(email: string) {
+    return await this.db.user.findUnique({
+      where: {
+        email: email,
+      },
+      select: this.userSelect,
+    });
+  }
 
   async validateUser(email: string, password: string) {
     const user = await this.db.user.findUnique({
       where: {
         email: email,
       },
-      select: this.userSelect,
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        passwordHash: true,
+      },
     });
 
     if (user && comparePassword(password, user.passwordHash)) {
@@ -31,6 +45,8 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
+
+    console.log(user);
 
     if (!user) {
       throw new UnauthorizedException('Invalid email');
@@ -46,14 +62,16 @@ export class AuthService {
     }
 
     const token = await jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: '1d',
+      expiresIn: '365d',
     });
 
     const { passwordHash, ...userWithoutPassword } = user;
 
     return {
-      info: userWithoutPassword,
+      message: 'Login successful',
+      status: 200,
       token: token,
+      user: userWithoutPassword,
     };
   }
 

@@ -7,11 +7,179 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  MANAGER
+  EMPLOYEE
+}
+
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
+  id             String           @id @default(uuid())
+  name           String
+  email          String           @unique
+  passwordHash   String
+  role           Role             @default(EMPLOYEE)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  userRestaurant UserRestaurant[]
+}
+
+model Restaurant {
+  id             String           @id @default(uuid())
+  name           String           @unique
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  branch         Branch[]
+  userRestaurant UserRestaurant[]
+}
+
+model UserRestaurant {
+  id           String     @id @default(uuid())
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model Branch {
+  id           String     @id @default(uuid())
+  name         String     @unique
+  address      String
+  phone        String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurantId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  employee       Employee[]
+  position       position[]
+  category       Category[]
+  order          Orders[]
+  code           Code[]
+  EmployeeBranch EmployeeBranch[]
+}
+
+model position {
+  id   String @id @default(uuid())
+  name String @unique
+
+  Branch   Branch @relation(fields: [branchId], references: [id])
+  branchId String
+
+  employee Employee[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Employee {
+  id             String           @id @default(uuid())
+  name           String
+  email          String           @unique
+  phone          String
+  address        String
+  salary         Int
+  branch         Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId       String
+  position       position         @relation(fields: [positionId], references: [id], onDelete: Cascade)
+  positionId     String
+  EmployeeBranch EmployeeBranch[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model EmployeeBranch {
+  id         String   @id @default(uuid())
+  employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId String
+  branch     Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId   String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  nameTH    String
+  nameEN    String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  product   Product[]
+
+  brnach   Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId String
+}
+
+model Product {
+  id         String   @id @default(uuid())
+  nameTH     String
+  nameEN     String
+  price      Decimal  @db.Decimal(10, 2)
+  image      String?
+  quantity   Int
+  cost       Decimal  @db.Decimal(10, 2)
+  available  Boolean  @default(true)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  orderItem OrderItem[]
+}
+
+enum StatusEnum {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model Code {
+  id           String   @id @default(uuid())
+  code         String
+  description  String
+  discount     Decimal  @db.Decimal(10, 2)
+  isPercentage Boolean  @default(false)
+  isActive     Boolean  @default(true)
+  limit        Int
+  Orders       Orders[]
+  Branch       Branch?  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId     String?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  quantity  Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Orders   Orders? @relation(fields: [ordersId], references: [id], onDelete: Cascade)
+  ordersId Int?
+}
+
+model Orders {
+  id     Int        @id @default(autoincrement())
+  status StatusEnum
+
+  takeAway Boolean
+  table    String?
+
+  total         Decimal     @db.Decimal(10, 2)
+  totalPaid     Decimal     @db.Decimal(10, 2)
+  discount      Decimal     @default(0) @db.Decimal(10, 2)
+  totalQuantity Int
+  items         OrderItem[]
+
+  code     Code?   @relation(fields: [codeId], references: [id])
+  codeId   String?
+  branch   Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branchId String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

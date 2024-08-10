@@ -11,8 +11,7 @@ export class UsersService {
     id: true,
     email: true,
     name: true,
-    createdAt: true,
-    updatedAt: true,
+    role: true,
   };
 
   constructor(private db: DbService) {}
@@ -34,6 +33,7 @@ export class UsersService {
           name: createUserDto.name,
           email: createUserDto.email,
           passwordHash: await hashPassword(createUserDto.password),
+          role: createUserDto.role,
         },
         select: this.includeSelect,
       });

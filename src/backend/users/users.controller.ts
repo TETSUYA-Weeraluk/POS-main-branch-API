@@ -34,7 +34,6 @@ export class UsersController {
     description: '### This API use for get list user',
     summary: 'Get list user',
   })
-  @UseGuards(AuthGaurd)
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -45,7 +44,6 @@ export class UsersController {
     description: '### This API use for find User',
     summary: 'Find user',
   })
-  @UseGuards(AuthGaurd)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(id);
@@ -56,7 +54,6 @@ export class UsersController {
     description: '### This API use for update User',
     summary: 'Update user',
   })
-  @UseGuards(AuthGaurd)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(id, updateUserDto);
