@@ -46,13 +46,19 @@ export class UsersService {
     });
   }
 
-  findOne(id: string) {
-    return this.db.user.findUnique({
+  async findOne(id: string) {
+    const users = await this.db.user.findUnique({
       where: {
         id: id,
       },
       select: this.includeSelect,
     });
+
+    if (!users) {
+      throw new BadRequestException('User not found');
+    }
+
+    return users;
   }
 
   update(id: string, updateUserDto: UpdateUserDto) {

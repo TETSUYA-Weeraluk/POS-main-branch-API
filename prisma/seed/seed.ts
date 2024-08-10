@@ -30,6 +30,19 @@ async function main() {
   const restaurant = await prisma.restaurant.create({
     data: {
       name: 'Ragnarok',
+      image: 'poring.png',
+      userRestaurant: {
+        create: {
+          userId: user.id,
+        },
+      },
+    },
+  });
+
+  const restaurant2 = await prisma.restaurant.create({
+    data: {
+      name: 'Tera Kashiten',
+      image: 'tera.jpg',
       userRestaurant: {
         create: {
           userId: user.id,
@@ -43,6 +56,17 @@ async function main() {
       name: 'Poring Shop',
       address: 'Payon',
       phone: '112233',
+      image: restaurant.image,
+      restaurantId: restaurant.id,
+    },
+  });
+
+  const branch2 = await prisma.branch.create({
+    data: {
+      name: 'Tera Kashiten 1',
+      address: 'Phuket',
+      phone: '11111111',
+      image: restaurant2.image,
       restaurantId: restaurant.id,
     },
   });

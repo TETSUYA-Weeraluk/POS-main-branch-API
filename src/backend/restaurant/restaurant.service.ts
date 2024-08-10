@@ -1,4 +1,3 @@
-import { Restaurant } from './entities/restaurant.entity';
 import {
   ConflictException,
   HttpException,
@@ -15,6 +14,7 @@ export class RestaurantService {
   private includeSelect: Prisma.RestaurantSelect = {
     id: true,
     name: true,
+    image: true,
     userRestaurant: {
       include: {
         user: {
@@ -78,6 +78,7 @@ export class RestaurantService {
         data: {
           name: createRestaurantDto.name,
         },
+        select: this.includeSelect,
       });
 
       await this.db.userRestaurant.create({
@@ -118,15 +119,26 @@ export class RestaurantService {
 
   async findOwned(userId: string) {
     try {
-      const restaurants = await this.db.userRestaurant.findMany({
+      // const restaurants = await this.db.userRestaurant.findMany({
+      //   where: {
+      //     userId,
+      //   },
+      //   select: {
+      //     restaurant: {
+      //       select: this.includeSelect,
+      //     },
+      //   },
+      // });
+
+      const restaurants = await this.db.restaurant.findMany({
         where: {
-          userId,
-        },
-        select: {
-          restaurant: {
-            select: this.includeSelect,
+          userRestaurant: {
+            some: {
+              userId,
+            },
           },
         },
+        select: this.includeSelect,
       });
 
       return restaurants;
@@ -143,7 +155,18 @@ export class RestaurantService {
     return `This action updates a #${id} restaurant`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} restaurant`;
+  remove(id: string) {
+    try {
+      const restaurant = this.db.restaurant.delete({
+        where: {
+          id,
+        },
+        select: this.includeSelect,
+      });
+
+      return restaurant;
+    } catch (error) {
+      throw new HttpException(error.message, HttpStatus.NOT_FOUND);
+    }
   }
 }
