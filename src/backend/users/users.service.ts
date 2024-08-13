@@ -8,7 +8,6 @@ import { hashPassword } from 'src/lib/bcrypt';
 @Injectable()
 export class UsersService {
   private includeSelect: Prisma.UserSelect = {
-    id: true,
     email: true,
     name: true,
     role: true,

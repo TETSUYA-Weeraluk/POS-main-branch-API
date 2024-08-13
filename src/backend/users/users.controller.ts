@@ -7,12 +7,14 @@ import {
   Param,
   Delete,
   UseGuards,
+  Headers,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGaurd } from 'src/guard/auth-gaurd.guard';
+import * as jwt from 'jsonwebtoken';
 
 @Controller('users')
 @ApiTags('User')
@@ -39,6 +41,19 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @UseGuards(AuthGaurd)
+  @Get('Getme')
+  findMe(@Headers('authorization') authorization: string) {
+    const token = authorization.split(' ')[1];
+    const decode = jwt.decode(token);
+
+    if (!decode) {
+      return { message: 'Invalid token' };
+    }
+
+    return this.usersService.findOne(decode['id']);
+  }
+
   @ApiOkResponse({ description: 'User find' })
   @ApiOperation({
     description: '### This API use for find User',
@@ -46,6 +61,7 @@ export class UsersController {
   })
   @Get(':id')
   findOne(@Param('id') id: string) {
+    console.log('test');
     return this.usersService.findOne(id);
   }
 

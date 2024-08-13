@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateRestaurantDto {
   @ApiProperty({
@@ -9,6 +9,12 @@ export class CreateRestaurantDto {
   })
   @IsNotEmpty()
   name: string;
+
+  @ApiProperty({
+    description: 'Image',
+  })
+  @IsString()
+  image: string;
 
   @IsNotEmpty()
   @ApiProperty({

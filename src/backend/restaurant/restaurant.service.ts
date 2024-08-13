@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   HttpException,
   HttpStatus,
@@ -151,8 +152,29 @@ export class RestaurantService {
     return `This action returns a #${id} restaurant`;
   }
 
-  update(id: number, updateRestaurantDto: UpdateRestaurantDto) {
-    return `This action updates a #${id} restaurant`;
+  async update(id: string, updateRestaurantDto: UpdateRestaurantDto) {
+    try {
+      const restaurant = await this.db.restaurant.findUnique({
+        where: {
+          id,
+        },
+      });
+
+      if (!restaurant) {
+        throw new BadRequestException('Restaurant not found');
+      }
+
+      const updatedRestaurant = this.db.restaurant.update({
+        where: {
+          id,
+        },
+        data: updateRestaurantDto,
+        select: this.includeSelect,
+      });
+
+      return updatedRestaurant;
+    } catch (error) {}
+    return;
   }
 
   remove(id: string) {
