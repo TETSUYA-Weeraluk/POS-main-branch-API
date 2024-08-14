@@ -40,11 +40,6 @@ export class RestaurantController {
     return this.restaurantService.findOwned(decode['id']);
   }
 
-  @Get('owner/:id')
-  findOwned(@Param('id') id: string) {
-    return this.restaurantService.findOwned(id);
-  }
-
   @Get()
   findAll() {
     return this.restaurantService.findAll();

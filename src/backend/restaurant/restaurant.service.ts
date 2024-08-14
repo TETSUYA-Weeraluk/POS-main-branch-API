@@ -160,8 +160,37 @@ export class RestaurantService {
     }
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} restaurant`;
+  async findOne(id: string) {
+    const restaurant = await this.db.restaurant.findUnique({
+      where: {
+        id,
+      },
+      select: {
+        id: true,
+        name: true,
+        image: true,
+        branch: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            image: true,
+            phone: true,
+            employee: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!restaurant) {
+      throw new BadRequestException('Restaurant not found');
+    }
+
+    return restaurant;
   }
 
   async update(id: string, updateRestaurantDto: UpdateRestaurantDto) {
