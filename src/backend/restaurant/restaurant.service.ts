@@ -120,17 +120,6 @@ export class RestaurantService {
 
   async findOwned(userId: string) {
     try {
-      // const restaurants = await this.db.userRestaurant.findMany({
-      //   where: {
-      //     userId,
-      //   },
-      //   select: {
-      //     restaurant: {
-      //       select: this.includeSelect,
-      //     },
-      //   },
-      // });
-
       const restaurants = await this.db.restaurant.findMany({
         where: {
           userRestaurant: {
@@ -139,7 +128,30 @@ export class RestaurantService {
             },
           },
         },
-        select: this.includeSelect,
+        select: {
+          id: true,
+          name: true,
+          image: true,
+          userRestaurant: {
+            select: {
+              user: {
+                select: {
+                  email: true,
+                  name: true,
+                  role: true,
+                },
+              },
+            },
+          },
+          branch: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: {
+          createdAt: 'asc',
+        },
       });
 
       return restaurants;

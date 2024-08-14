@@ -16,7 +16,6 @@ export class CreateRestaurantDto {
   @IsString()
   image: string;
 
-  @IsNotEmpty()
   @ApiProperty({
     description: 'User ID',
     required: true,
